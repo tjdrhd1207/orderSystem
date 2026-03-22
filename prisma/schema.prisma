@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. 상품 모델: 재고(stock)가 핵심
+model Product {
+  id      Int   @id @default(autoincrement())
+  name    String
+  price   Int
+  stock   Int
+  description String?
+  createdAt   DateTime  @default(now())
+  updateAt    DateTime  @updatedAt
+  orders      Order[]
+}
+
+// 2. 주문 모델: 누가 어떤 상품을 구매했는지 기록
+model Order {
+  id          Int         @id @default(autoincrement())
+  productId   Int
+  product     Product     @relation(fields: [productId], references: [id])
+  userId      String
+  quantity    Int         @default(1)
+  status      OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELED
+}

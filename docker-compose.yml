@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # PostgreSQL: 주문 및 사용자 데이터 저장
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ordering_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Redis: BullMQ 대기열 및 캐싱
+  redis:
+    image: redis:7-alpine
+    container_name: redis-cache
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
