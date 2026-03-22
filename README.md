@@ -138,8 +138,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 2. 빌드 아티팩트 초기화
 캐시된 dist 폴더 내의 잘못된 설정 파일(dist/.env 등)이 참조되는 것을 방지하기 위해 빌드 폴더를 완전히 삭제 후 재실행했습니다.
 
-PowerShell
-# PowerShell 기준
+# PowerShell
 Remove-Item -Recurse -Force dist
 npm run start:dev
 💡 학습 포인트 (Key Takeaway)
