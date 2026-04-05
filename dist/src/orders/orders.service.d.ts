@@ -5,6 +5,9 @@ export declare class OrdersService {
     private prisma;
     constructor(prisma: PrismaService);
     createOrder(productId: number, userId: string): Promise<void>;
+    clearOrders(): Promise<{
+        message: string;
+    }>;
     create(createOrderDto: CreateOrderDto): string;
     findAll(): string;
     findOne(id: number): string;

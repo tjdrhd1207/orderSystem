@@ -22,6 +22,9 @@ let OrdersController = class OrdersController {
     async create(createOrderDto) {
         return await this.ordersService.createOrder(createOrderDto.productId, createOrderDto.userId);
     }
+    async clearAll() {
+        return await this.ordersService.clearOrders();
+    }
 };
 exports.OrdersController = OrdersController;
 __decorate([
@@ -31,6 +34,12 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "create", null);
+__decorate([
+    (0, common_1.Delete)('clear'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "clearAll", null);
 exports.OrdersController = OrdersController = __decorate([
     (0, common_1.Controller)('orders'),
     __metadata("design:paramtypes", [orders_service_1.OrdersService])

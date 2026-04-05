@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { OrdersController } from './orders/orders.controller';
+import { OrdersService } from './orders/orders.service';
+import { PrismaService } from './prisma.service';
 
 @Module({
   imports: [
@@ -8,5 +11,7 @@ import { ConfigModule } from '@nestjs/config';
       envFilePath: '.env', // 루트의 .env를 명시
     }),
   ],
+  controllers: [OrdersController],
+  providers: [OrdersService, PrismaService]
 })
 export class AppModule {}

@@ -17,23 +17,30 @@ let OrdersService = class OrdersService {
         this.prisma = prisma;
     }
     async createOrder(productId, userId) {
-        const product = await this.prisma.product.findUnique({
-            where: { id: productId },
+        return await this.prisma.$transaction(async (transaction) => {
+            const products = await transaction.$queryRawUnsafe(`SELECT * FROM "Product" WHERE ID = ${productId} FOR UPDATE`);
+            const product = products[0];
+            if (!product || product.stock <= 0) {
+                throw new common_1.BadRequestException("재고가 없습니다.");
+            }
+            await transaction.product.update({
+                where: { id: productId },
+                data: {
+                    stock: product.stock - 1
+                },
+            });
+            await transaction.order.create({
+                data: {
+                    productId,
+                    userId,
+                    status: 'COMPLETED'
+                }
+            });
         });
-        if (!product || product.stock <= 0) {
-            throw new common_1.BadRequestException('재고가 없습니다.');
-        }
-        await this.prisma.product.update({
-            where: { id: productId },
-            data: { stock: product.stock - 1 }
-        });
-        await this.prisma.order.create({
-            data: {
-                productId,
-                userId,
-                status: 'COMPLETED',
-            },
-        });
+    }
+    async clearOrders() {
+        await this.prisma.order.deleteMany({});
+        return { message: "주문 내역이 초기화되었습니다." };
     }
     create(createOrderDto) {
         return 'This action adds a new order';

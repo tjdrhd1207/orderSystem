@@ -6,4 +6,7 @@ export declare class OrdersController {
         productId: number;
         userId: string;
     }): Promise<void>;
+    clearAll(): Promise<{
+        message: string;
+    }>;
 }

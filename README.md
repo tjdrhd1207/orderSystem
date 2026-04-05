@@ -64,13 +64,13 @@ node test-order.js
 ```
 
 Phase 1: 문제 진단
-[ ] node test-order.js 실행 후 재고 정합성 어긋나는 현상 확인.
+[✔️] node test-order.js 실행 후 재고 정합성 어긋나는 현상 확인.
 
-[ ] Prisma Studio를 통해 실제 주문 수와 남은 재고의 불일치 데이터 로그 남기기.
+[✔️] Prisma Studio를 통해 실제 주문 수와 남은 재고의 불일치 데이터 로그 남기기.
 
 
 Phase 2: 동시성 문제 해결 (Race Condition Zero)
-[ ] Level 1. DB Pessimistic Lock (비관적 락): SELECT FOR UPDATE를 활용해 DB 수준에서 차례대로 줄 세우기.
+[✔️] Level 1. DB Pessimistic Lock (비관적 락): SELECT FOR UPDATE를 활용해 DB 수준에서 차례대로 줄 세우기.
 
 [ ] Level 2. Redis 기반 분산 락 (Distributed Lock): Redlock 알고리즘을 사용하여 애플리케이션 레벨에서 효율적으로 제어하기.
 
