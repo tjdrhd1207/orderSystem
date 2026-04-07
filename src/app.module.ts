@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { OrdersController } from './orders/orders.controller';
 import { OrdersService } from './orders/orders.service';
 import { PrismaService } from './prisma.service';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { PrismaService } from './prisma.service';
       isGlobal: true, // 전역에서 환경 변수 사용 가능하게 설정
       envFilePath: '.env', // 루트의 .env를 명시
     }),
+    RedisModule
   ],
   controllers: [OrdersController],
   providers: [OrdersService, PrismaService]

@@ -29,6 +29,7 @@
   "devDependencies": {
     "@nestjs/cli": "^10.4.9",
     "@nestjs/schematics": "^10.2.3",
+    "@types/ioredis": "^4.28.10",
     "@types/node": "^20.0.0",
     "prisma": "^7.5.0",
     "typescript": "^5.9.3"

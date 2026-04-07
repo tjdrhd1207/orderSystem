@@ -12,11 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrdersService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma.service");
+const redisLock_service_1 = require("../redis/redisLock.service");
 let OrdersService = class OrdersService {
-    constructor(prisma) {
+    constructor(prisma, redisLockService) {
         this.prisma = prisma;
+        this.redisLockService = redisLockService;
     }
-    async createOrder(productId, userId) {
+    async createOrderWithDbLock(productId, userId) {
         return await this.prisma.$transaction(async (transaction) => {
             const products = await transaction.$queryRawUnsafe(`SELECT * FROM "Product" WHERE ID = ${productId} FOR UPDATE`);
             const product = products[0];
@@ -37,6 +39,34 @@ let OrdersService = class OrdersService {
                 }
             });
         });
+    }
+    async createOrderWithRedisLock(productId, userId) {
+        const lock = await this.redisLockService.acquireLock(`lock:product:${productId}`);
+        if (!lock) {
+            throw new common_1.BadRequestException('다른 요청 처리 중');
+        }
+        try {
+            const product = await this.prisma.product.findUnique({
+                where: { id: productId },
+            });
+            if (!product || product.stock <= 0) {
+                throw new common_1.BadRequestException('재고 없음');
+            }
+            await this.prisma.product.update({
+                where: { id: productId },
+                data: { stock: product.stock - 1 },
+            });
+            await this.prisma.order.create({
+                data: {
+                    productId,
+                    userId,
+                    status: 'COMPLETED',
+                },
+            });
+        }
+        finally {
+            await this.redisLockService.releaseLock(lock);
+        }
     }
     async clearOrders() {
         await this.prisma.order.deleteMany({});
@@ -61,6 +91,7 @@ let OrdersService = class OrdersService {
 exports.OrdersService = OrdersService;
 exports.OrdersService = OrdersService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        redisLock_service_1.RedisLockService])
 ], OrdersService);
 //# sourceMappingURL=orders.service.js.map

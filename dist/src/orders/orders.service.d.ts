@@ -1,10 +1,13 @@
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from '../prisma.service';
+import { RedisLockService } from 'src/redis/redisLock.service';
 export declare class OrdersService {
     private prisma;
-    constructor(prisma: PrismaService);
-    createOrder(productId: number, userId: string): Promise<void>;
+    private readonly redisLockService;
+    constructor(prisma: PrismaService, redisLockService: RedisLockService);
+    createOrderWithDbLock(productId: number, userId: string): Promise<void>;
+    createOrderWithRedisLock(productId: number, userId: string): Promise<void>;
     clearOrders(): Promise<{
         message: string;
     }>;

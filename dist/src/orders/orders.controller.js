@@ -19,8 +19,11 @@ let OrdersController = class OrdersController {
     constructor(ordersService) {
         this.ordersService = ordersService;
     }
-    async create(createOrderDto) {
-        return await this.ordersService.createOrder(createOrderDto.productId, createOrderDto.userId);
+    async createWithDbLock(body) {
+        return await this.ordersService.createOrderWithDbLock(body.productId, body.userId);
+    }
+    async createWithRedisLock(body) {
+        return await this.ordersService.createOrderWithRedisLock(body.productId, body.userId);
     }
     async clearAll() {
         return await this.ordersService.clearOrders();
@@ -28,12 +31,19 @@ let OrdersController = class OrdersController {
 };
 exports.OrdersController = OrdersController;
 __decorate([
-    (0, common_1.Post)(),
+    (0, common_1.Post)('db'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], OrdersController.prototype, "create", null);
+], OrdersController.prototype, "createWithDbLock", null);
+__decorate([
+    (0, common_1.Post)('redis'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "createWithRedisLock", null);
 __decorate([
     (0, common_1.Delete)('clear'),
     __metadata("design:type", Function),

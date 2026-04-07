@@ -2,7 +2,11 @@ import { OrdersService } from './orders.service';
 export declare class OrdersController {
     private readonly ordersService;
     constructor(ordersService: OrdersService);
-    create(createOrderDto: {
+    createWithDbLock(body: {
+        productId: number;
+        userId: string;
+    }): Promise<void>;
+    createWithRedisLock(body: {
         productId: number;
         userId: string;
     }): Promise<void>;

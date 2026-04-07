@@ -12,6 +12,7 @@ const config_1 = require("@nestjs/config");
 const orders_controller_1 = require("./orders/orders.controller");
 const orders_service_1 = require("./orders/orders.service");
 const prisma_service_1 = require("./prisma.service");
+const redis_module_1 = require("./redis/redis.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -22,6 +23,7 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
                 envFilePath: '.env',
             }),
+            redis_module_1.RedisModule
         ],
         controllers: [orders_controller_1.OrdersController],
         providers: [orders_service_1.OrdersService, prisma_service_1.PrismaService]

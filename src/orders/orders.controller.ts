@@ -5,12 +5,26 @@ import { OrdersService } from './orders.service';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) { }
 
-  @Post()
-  async create(@Body() createOrderDto: { productId: number; userId: string } // 인자 바로 앞에!
+
+  // DB 락 버전
+  @Post('db')
+  async createWithDbLock(
+    @Body() body: { productId: number; userId: string } // 인자 바로 앞에!
   ) {
-    return await this.ordersService.createOrder(
-      createOrderDto.productId,
-      createOrderDto.userId,
+    return await this.ordersService.createOrderWithDbLock(
+      body.productId,
+      body.userId,
+    );
+  }
+
+// Redis락 버전
+@Post('redis')
+async createWithRedisLock(
+  @Body() body: { productId: number; userId: string }
+  ) {
+    return await this.ordersService.createOrderWithRedisLock(
+      body.productId,
+      body.userId,
     );
   }
 

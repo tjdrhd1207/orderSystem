@@ -4,12 +4,16 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from '../prisma.service';
 import { trace } from 'console';
 import { Backoffs } from 'bullmq';
+import { RedisLockService } from 'src/redis/redisLock.service';
 
 @Injectable()
 export class OrdersService {
 
   // constructor에서 PrismaService를 주입받음
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private readonly redisLockService: RedisLockService
+  ) { }
 
   // 조회 후 수정방식
   // 동시성 문제 발생하는 로직
@@ -40,11 +44,11 @@ export class OrdersService {
     });
 
   } */
-  async createOrder(productId: number, userId: string) {
-    return await this.prisma.$transaction(async(transaction) => {
-      
+  async createOrderWithDbLock(productId: number, userId: string) {
+    return await this.prisma.$transaction(async (transaction) => {
+
       // 1. 비관적 락
-      const products = await transaction.$queryRawUnsafe<any[]> (
+      const products = await transaction.$queryRawUnsafe<any[]>(
         `SELECT * FROM "Product" WHERE ID = ${productId} FOR UPDATE`
       );
 
@@ -74,10 +78,46 @@ export class OrdersService {
     })
   }
 
-  async clearOrders () {
+  async createOrderWithRedisLock(productId: number, userId: string) {
+    const lock = await this.redisLockService.acquireLock(
+      `lock:product:${productId}`
+    );
+
+    if (!lock) {
+      throw new BadRequestException('다른 요청 처리 중');
+    }
+
+    try {
+      const product = await this.prisma.product.findUnique({
+        where: { id: productId },
+      });
+
+      if (!product || product.stock <= 0) {
+        throw new BadRequestException('재고 없음');
+      }
+
+      await this.prisma.product.update({
+        where: { id: productId },
+        data: { stock: product.stock - 1 },
+      });
+
+      await this.prisma.order.create({
+        data: {
+          productId,
+          userId,
+          status: 'COMPLETED',
+        },
+      });
+
+    } finally {
+      await this.redisLockService.releaseLock(lock);
+    }
+  }
+
+  async clearOrders() {
     await this.prisma.order.deleteMany({});
 
-    return {message: "주문 내역이 초기화되었습니다."};
+    return { message: "주문 내역이 초기화되었습니다." };
   }
 
 
